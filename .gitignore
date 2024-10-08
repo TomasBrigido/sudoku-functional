@@ -1,12 +1,18 @@
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-!.vscode/*.code-snippets
+# Carpeta de configuración de VS Code
+.vscode/
 
-# Local History for Visual Studio Code
+# Extensiones específicas para archivos de trabajo
+*.code-workspace
+
+# Archivos temporales de VS Code
 .history/
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+# Archivos compilados
+*.class
+*.o
+*.out
+*.so
+*.exe
