@@ -95,24 +95,24 @@ bool validInSubgrid (Grid grid, int row, int col, int n){
    const auto lineFinish = grid.begin() + subgridRowStart + 3;
 
    
-   const vector <int>  subgrid;
+   vector <int>  subgrid;
 
 
-   for_each(lineStart, lineFinish,[subgridColStart](vector<optional<int>> line){
+   for_each(lineStart, lineFinish,[&subgrid,subgridColStart](vector<optional<int>> &line){
    
       const auto colStart = line.begin() + subgridColStart;
       const auto colFinish = line.begin() + subgridColStart + 3;
    
-      for_each(colStart,colFinish,[](optional<int> x){
+      for_each(colStart,colFinish,[&subgrid](const optional<int> &x){
             if(x == nullopt){
-            cout << ". ";
+            
          }else{
-            cout << x.value() << " ";
+            subgrid.push_back(x.value());
          };
       });
-      cout << endl;});
-
-   return true;
+   });
+   
+   return find(subgrid.begin(),subgrid.end(),n) == subgrid.end();
 }
 
 int main() {
@@ -121,6 +121,6 @@ int main() {
    printGrid(grid);
    cout << "\nSolving...\n\n";
 
-   validInSubgrid(grid,3,0,4);
+   cout << validInSubgrid(grid,1,0,3);
    return 0;
 }
