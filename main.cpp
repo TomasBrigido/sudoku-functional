@@ -43,7 +43,7 @@ void printGrid(vector<vector <optional<int>> > grid){
                cout << x.value() << " ";
             };
          });
-         cout << std::endl;});
+         cout << endl;});
 }
 
 /*
@@ -81,14 +81,38 @@ bool validInCol(Grid grid, int col, int value){
 }
 
 /*
-*  @brief Check if a value is valid in the row
-*  @details Funcion find busca el valor dado, sino lo encuentra devueve grid.end()
+*  @brief Check if a value is valid in the subGrid (3x3)
+*  @details 
 *
 *  @return valid     -> true;
-*  @return not valid -> false;
 */
 bool validInSubgrid (Grid grid, int row, int col, int n){
+
+   const int subgridRowStart = ((((row +1) -1)/3)*3);
+   const int subgridColStart = ((((col +1) -1)/3)*3);
+
+   const auto lineStart = grid.begin() + subgridRowStart;
+   const auto lineFinish = grid.begin() + subgridRowStart + 3;
+
    
+   const vector <int>  subgrid;
+
+
+   for_each(lineStart, lineFinish,[subgridColStart](vector<optional<int>> line){
+   
+      const auto colStart = line.begin() + subgridColStart;
+      const auto colFinish = line.begin() + subgridColStart + 3;
+   
+      for_each(colStart,colFinish,[](optional<int> x){
+            if(x == nullopt){
+            cout << ". ";
+         }else{
+            cout << x.value() << " ";
+         };
+      });
+      cout << endl;});
+
+   return true;
 }
 
 int main() {
@@ -97,6 +121,6 @@ int main() {
    printGrid(grid);
    cout << "\nSolving...\n\n";
 
-   cout << validInCol(grid,0,5);
+   validInSubgrid(grid,3,0,4);
    return 0;
 }
