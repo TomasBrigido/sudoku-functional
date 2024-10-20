@@ -4,20 +4,21 @@
 #include <functional>
 #include <algorithm>
 #include <optional>
+#include <tuple>
 
 using namespace std;
 
 /*
-*  @brief   Define the Grid type as a 9x9 matrix of Int
-*  @details using Grid -> Alias para el tipo de matriz que necesito
-*  @details optional<int> similar a maybe en haskell
+*  @brief   Define the Grid type as vector of vectors
+*  @details Uso Grid -> Alias para el tipo de matriz que necesito.
+*           El dato optional<int> es similar a maybe en haskell.
 *  
-*  @param vector<vector<optional<int>>>
+*  @param   vector<vector<optional<int>>>
 */
 using Grid = vector<vector<optional<int>>>;
 
 /*
-*  @brief Example Sudoku grid with some initial values
+*  @brief   Example Sudoku grid with some initial values
 */
 const Grid grid = {
       {5,nullopt,1,nullopt,nullopt,nullopt,nullopt,nullopt,nullopt},
@@ -32,7 +33,7 @@ const Grid grid = {
    };
 
 /*
-*  @brief Pretty-print the Sudoku grid
+*  @brief   Pretty-print the Sudoku grid
 */
 void printGrid(vector<vector <optional<int>> > grid){
    for_each(grid.begin(), grid.end(),[](vector<optional<int>> line){
@@ -47,9 +48,9 @@ void printGrid(vector<vector <optional<int>> > grid){
 }
 
 /*
-*  @brief Set a value at a specific row and column in the Grid
+*  @brief   Set a value at a specific row and column in the Grid
 *
-*  @return A new Grid
+*  @return  A new Grid
 */
 Grid setValue(Grid grid, int row, int col, optional<int> value){
    grid[row][col] = value;
@@ -57,34 +58,36 @@ Grid setValue(Grid grid, int row, int col, optional<int> value){
 }
 
 /*
-*  @brief Check if a value is valid in the row
-*  @details Funcion find busca el valor dado, sino lo encuentra devueve grid.end()
+*  @brief   Check if a value is valid in the row
+*  @details Funcion find busca el valor dado. Si no lo encuentra devueve grid.end()
 *
-*  @return valid     -> true;
-*  @return not valid -> false;
+*  @return  valid     -> true;
+*  @return  not valid -> false;
 */
 bool validInRow (Grid grid, int row, int value){
    return find(grid[row].begin(), grid[row].end(),value) == grid[row].end();
 }
 
 /*
-*  @brief Check if a value is valid in the col
+*  @brief   Check if a value is valid in the col
 *  @details Funcion none_of() recorre cada fila y en el valor de la columna compara con value.
 *           Retorna true si ningun elemento cumple la funcion lambda y false si al menos un
 *           elemento lo cumple
 *
-*  @return valid     -> true;
-*  @return not valid -> false;
+*  @return  valid     -> true;
+*  @return  not valid -> false;
 */
 bool validInCol(Grid grid, int col, int value){
    return none_of(grid.begin(), grid.end(), [col, value](const vector<optional<int>> row) { return row[col] == value; });
 }
 
 /*
-*  @brief Check if a value is valid in the subGrid (3x3)
-*  @details 
+*  @brief   Check if a value is valid in the subGrid (3x3)
+*  @details Primero defino los limites de la subgrid.
+*           Luego la recorro con el for_each() guardando los valores en subgrid.
+*           Y con el find() controlo si el dato n esta en la subgrid.
 *
-*  @return valid     -> true;
+*  @return  valid -> true;
 */
 bool validInSubgrid (Grid grid, int row, int col, int n){
 
@@ -115,12 +118,57 @@ bool validInSubgrid (Grid grid, int row, int col, int n){
    return find(subgrid.begin(),subgrid.end(),n) == subgrid.end();
 }
 
+/*
+*  @brief   Check if a value is valid in row col and subgrid
+*
+*  @return  valid -> true;
+*/
+bool isValid(Grid grid,int row, int col, int n){
+
+   if(validInRow(grid,row,n) && validInCol(grid,col,n) && validInSubgrid(grid,row,col,n)){
+      return true;
+   }
+   return false;
+}
+
+/*
+*  @brief   Find the coords of an empy cell
+*  @details Utilizo una funcion recursiva para ir recorriendo linea por linea la matriz.
+*           Utilizo find_if() para entonctrar la celda que no tiene valor.
+*           Devuelvo el par con las cordenadas de la celda vacia.
+*
+*  @return  Pair of an empty cell coords;
+*/
+optional<std::pair<int, int>> findEmptyCell(const Grid grid, int row = 0) {
+
+   //Condicion de corte de la recusividad
+   if (row >= grid.size()) {
+      return nullopt;
+   }
+
+   auto data = find_if(grid[row].begin(), grid[row].end(), [](const std::optional<int>& cell) {
+      return !cell.has_value();
+   });
+
+   if (data != grid[row].end()) {
+      int col = distance(grid[row].begin(), data);
+      return make_pair(row, col);
+   }
+
+   return findEmptyCell(grid, row + 1);
+}
+
 int main() {
 
    cout << "Initial Sudoku grid: \n\n";
    printGrid(grid);
    cout << "\nSolving...\n\n";
 
-   cout << validInSubgrid(grid,1,0,3);
+   optional <pair<int,int>> test;
+
+   test = findEmptyCell(grid); 
+
+   cout << "\n(" << test->first << "," << test->second << ")\n";
+
    return 0;
 }
