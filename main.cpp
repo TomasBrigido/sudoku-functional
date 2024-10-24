@@ -16,6 +16,9 @@ using namespace std;
 *  @param   vector<vector<optional<int>>>
 */
 using Grid = vector<vector<optional<int>>>;
+const int numeros[9] = {1,2,3,4,5,6,7,8,9};
+optional <Grid> tryValues(const Grid grid, optional<pair<int, int>> coords, const int numeros[9], int num = 0);
+
 
 /*
 *  @brief   Example Sudoku grid with some initial values
@@ -35,7 +38,7 @@ const Grid grid = {
 /*
 *  @brief   Pretty-print the Sudoku grid
 */
-void printGrid(vector<vector <optional<int>> > grid){
+void printGrid(Grid grid){
    for_each(grid.begin(), grid.end(),[](vector<optional<int>> line){
          for_each(line.begin(),line.end(),[](optional<int> x){
             if(x == nullopt){
@@ -139,14 +142,14 @@ bool isValid(Grid grid,int row, int col, int n){
 *
 *  @return  Pair of an empty cell coords;
 */
-optional<std::pair<int, int>> findEmptyCell(const Grid grid, int row = 0) {
+optional<pair<int, int>> findEmptyCell(const Grid grid, int row = 0) {
 
    //Condicion de corte de la recusividad
    if (row >= grid.size()) {
       return nullopt;
    }
 
-   auto data = find_if(grid[row].begin(), grid[row].end(), [](const std::optional<int>& cell) {
+   auto data = find_if(grid[row].begin(), grid[row].end(), [](const optional<int>& cell) {
       return !cell.has_value();
    });
 
@@ -158,17 +161,59 @@ optional<std::pair<int, int>> findEmptyCell(const Grid grid, int row = 0) {
    return findEmptyCell(grid, row + 1);
 }
 
+/*
+*  @brief   Find the coords of an empy cell
+*  @details Utilizo una funcion recursiva para ir recorriendo linea por linea la matriz.
+*           Utilizo find_if() para entonctrar la celda que no tiene valor.
+*           Devuelvo el par con las cordenadas de la celda vacia.
+*
+*  @return  Pair of an empty cell coords;
+*/
+optional <Grid> solveSudoku (const Grid grid){
+   if(findEmptyCell(grid) == nullopt){
+      return grid; //Solucion del sudoku
+   }else{
+      tryValues(grid,findEmptyCell(grid),numeros);
+   }
+}
+/*
+*  @brief   Find the coords of an empy cell
+*  @details Utilizo una funcion recursiva para ir recorriendo linea por linea la matriz.
+*           Utilizo find_if() para entonctrar la celda que no tiene valor.
+*           Devuelvo el par con las cordenadas de la celda vacia.
+*
+*  @return  Pair of an empty cell coords;
+*/
+
+optional <Grid> tryValues(const Grid grid, optional<pair<int, int>> coords, const int numeros[9], int num){
+   
+   if(isValid(grid,coords->first,coords->second,numeros[num])){
+
+      const optional <Grid> solution = solveSudoku(setValue(grid,coords->first,coords->second,numeros[0]));
+
+      if(solution != nullopt){
+         return solution;
+      }else{
+         tryValues(grid,coords,numeros,num+1);
+      }
+   }else{
+      tryValues(grid,coords,numeros,num+1);
+   }
+   
+}
+
 int main() {
 
    cout << "Initial Sudoku grid: \n\n";
    printGrid(grid);
    cout << "\nSolving...\n\n";
 
-   optional <pair<int,int>> test;
+   const optional <Grid> solution = solveSudoku(grid);
+   if(solution != nullopt){
+      cout<<"Solved Sudoku grid: \n\n";
+      printGrid(solution.value());
+      cout<<"No solution found. \n\n";
 
-   test = findEmptyCell(grid); 
-
-   cout << "\n(" << test->first << "," << test->second << ")\n";
-
+   }
    return 0;
 }
